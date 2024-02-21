@@ -6,6 +6,7 @@ env:
   CARGO_TERM_COLOR: always
   SQLX_VERSION: 0.7.3
   SQLX_FEATURES: "rustls,postgres"
+  DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ vars.DB_NAME }}
 
 jobs:
   test:
@@ -69,15 +70,16 @@ jobs:
         run: cargo fmt --check
 
   clippy:
+    environment: CI
     name: Clippy
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ vars.DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -107,15 +109,16 @@ jobs:
         run: cargo clippy -- -D warnings
 
   coverage:
+    environment: CI
     name: Code coverage
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ vars.DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -130,6 +133,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: apt install sudo
       - name: Install postgresql-client
         run: sudo apt-get update && sudo apt-get install postgresql-client -y
       - uses: Swatinem/rust-cache@v2
