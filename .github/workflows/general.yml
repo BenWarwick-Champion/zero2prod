@@ -133,7 +133,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - uses: apt install sudo
+      - name: Install sudo
+        run: apt install sudo
       - name: Install postgresql-client
         run: sudo apt-get update && sudo apt-get install postgresql-client -y
       - uses: Swatinem/rust-cache@v2
